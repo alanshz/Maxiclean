@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maxi Clean - Quiénes Somos</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f5f2; /* Light background similar to main design */
+        }
+        /* Custom styles for section backgrounds if needed */
+        .section-bg-image {
+            background-image: url('https://placehold.co/1200x400/D3A575/fff?text=Fondo+de+Seccion'); /* Placeholder if any section needs a specific background */
+            background-size: cover;
+            background-position: center;
+        }
+        /* Style for the Google Map iframe */
+        .map-iframe {
+            height: 400px; /* Height for the map */
+            width: 100%; /* Full width */
+            border-radius: 0.5rem; /* rounded-lg equivalent */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md equivalent */
+            border: 0; /* Remove default iframe border */
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+    <!-- Header Section (Consistent with main page) -->
+    <header class="bg-white shadow-sm py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center max-w-7xl">
+            <!-- Logo -->
+            <div class="flex items-center">
+                <!-- Link the logo to the home page -->
+                <a href="index.html">
+                    <img src="https://www.grupomaxiclean.com/portal/img/GFMC.png" alt="Grupo Ferretero Maxi Clean Logo" class="h-10 sm:h-12 mr-2 onerror='this.onerror=null;this.src=\"https://placehold.co/100x50/D3A575/fff?text=Maxi+Clean\";'">
+                </a>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex space-x-6">
+                <!-- Home link already points to index.html -->
+                <a href="index.html" class="text-blue-700 hover:text-orange-600 font-medium">Inicio</a>
+                <a href="quienes_somos.html" class="text-blue-700 hover:text-orange-600 font-medium">Quiénes Somos</a>
+                <a href="products.html" class="text-blue-700 hover:text-orange-600 font-medium">Productos</a>
+                <a href="#" class="text-blue-700 hover:text-orange-600 font-medium">Ofertas</a>
+                <a href="#" class="text-blue-700 hover:text-orange-600 font-medium">Contacto</a>
+            </nav>
+
+            <!-- Icons (Cart and User) -->
+            <div class="flex items-center space-x-4">
+                <a href="#" class="text-blue-700 hover:text-orange-600 text-lg">
+                    <i class="fas fa-shopping-cart"></i>
+                </a>
+                <a href="#" class="text-blue-700 hover:text-orange-600 text-lg">
+                    <i class="fas fa-user"></i>
+                </a>
+                <!-- Hamburger menu for mobile -->
+                <button class="md:hidden text-blue-700 text-lg">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="py-8">
+        <div class="container mx-auto px-4 max-w-7xl">
+            <!-- Quiénes somos? Section -->
+            <section class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div class="flex flex-col md:flex-row items-center gap-8">
+                    <div class="md:w-1/2">
+                        <img src="https://carbonestore.cr/cdn/shop/articles/herramientas_1_800x.jpg?v=1679108998" alt="Herramientas de construcción" class="rounded-lg shadow-md w-full h-auto">
+                    </div>
+                    <div class="md:w-1/2 text-center md:text-left">
+                        <h1 class="text-3xl font-bold text-gray-800 mb-4">¿Quiénes somos?</h1>
+                        <p class="text-gray-700 leading-relaxed">
+                            Somos Maxiclean, tu fuente confiable de herramientas y materiales de construcción desde 2010. Nos enorgullece ofrecer a nuestros clientes productos de alta calidad y un servicio excepcional para satisfacer todas sus necesidades de construcción y reparación.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Misión, Visión, Valores Section -->
+            <section class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div>
+                        <h2 class="text-2xl font-bold text-orange-600 mb-3">MISIÓN</h2>
+                        <p class="text-gray-700 leading-relaxed">
+                            Nuestra misión es brindar a nuestros clientes las mejores soluciones para sus proyectos, ya sean pequeños trabajos de bricolaje o proyectos de construcción a gran escala. Nos esforzamos por ofrecer productos confiables y duraderos que faciliten y mejoren la vida de nuestros clientes.
+                        </p>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-orange-600 mb-3">VISIÓN</h2>
+                        <p class="text-gray-700 leading-relaxed">
+                            Ser líderes en el mercado ferretero y de pinturas, ofreciendo un servicio rápido eficiente y de calidad basado en la innovación continua con un equipo de trabajo capacitado, comprometiéndonos a brindar el mejor servicio, siendo los mejores en el mercado.
+                        </p>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-orange-600 mb-3">VALORES</h2>
+                        <p class="text-gray-700 leading-relaxed">
+                            En la ferretería Maxiclean, valoramos la integridad, la calidad y la satisfacción del cliente. Nos esforzamos por mantener relaciones a largo plazo con nuestros clientes y proveedores, basadas en la confianza y la excelencia en el servicio.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ubicación Section (with Google Maps Embed) -->
+            <section class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">UBICACIÓN</h2>
+                <p class="text-gray-700 leading-relaxed mb-6 text-center">
+                    Puedes encontrarnos en Fidel Velázquez 157, Eduardo Caballero, 67117 Guadalupe, N.L., donde nuestro equipo de expertos en ferretería estará encantado de ayudarte a encontrar las herramientas y materiales adecuados para tu próximo proyecto.
+                </p>
+                <div class="flex justify-center">
+                    <!-- Google Map Embed from the specified address -->
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3596.536109968832!2d-100.20703852445838!3d25.76100570776541!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x866291a1a5b828a5%3A0xc3f8f9f0f9b6e82c!2sFidel%20Vel%C3%A1zquez%20157%2C%20Eduardo%20Caballero%2C%2067117%20Guadalupe%2C%20N.L.!5e0!3m2!1ses-419!2smx!4v1719520000000!5m2!1ses-419!2smx"
+                        class="map-iframe"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </section>
+
+            <!-- Horario de Atención Section -->
+            <section class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">HORARIO DE ATENCIÓN</h2>
+                <p class="text-gray-700 leading-relaxed text-center">
+                    Nuestro horario de atención es de 9:00 AM a 7:00 PM de lunes a viernes, y de 9:00 A.M a 2:00 PM los sábados.
+                </p>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer Section (Consistent with main page) -->
+    <footer class="bg-gray-800 text-gray-300 py-10 rounded-t-xl mt-8">
+        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8 max-w-7xl">
+            <!-- Company Column -->
+            <div>
+                <h4 class="text-white font-semibold text-lg mb-4">Compañía</h4>
+                <ul>
+                    <li class="mb-2"><a href="quienes_somos.html" class="hover:text-white transition duration-200">Sobre nosotros</a></li>
+                    <li class="mb-2"><a href="#" class="hover:text-white transition duration-200">Iniciar sesión</a></li>
+                </ul>
+            </div>
+
+            <!-- Account Column -->
+            <div>
+                <h4 class="text-white font-semibold text-lg mb-4">Cuenta</h4>
+                <ul>
+                    <li class="mb-2"><a href="#" class="hover:text-white transition duration-200">Crear cuenta</a></li>
+                    <li class="mb-2"><a href="#" class="hover:text-white transition duration-200">Acceso</a></li>
+                </ul>
+            </div>
+
+            <!-- Support Column -->
+            <div>
+                <h4 class="text-white font-semibold text-lg mb-4">Apoyo</h4>
+                <ul>
+                    <li class="mb-2"><a href="#" class="hover:text-white transition duration-200">Contacto</a></li>
+                    <li class="mb-2"><a href="#" class="hover:text-white transition duration-200">Solicitar productos</a></li>
+                </ul>
+            </div>
+
+            <!-- About Maxi Clean Column -->
+            <div class="md:col-span-1">
+                <h4 class="text-white font-semibold text-lg mb-4">Sobre Maxi Clean</h4>
+                <p>Maxiclean es una ferretería que cuenta con años de experiencia brindándole los mejores productos de las mejores marcas.</p>
+            </div>
+        </div>
+
+        <!-- Footer Bottom Bar -->
+        <div class="border-t border-gray-700 mt-8 pt-6">
+            <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center text-sm text-gray-400 max-w-7xl">
+                <p class="mb-2 md:mb-0">Fidel Velázquez 157, Joyas del Pedregal, Apodaca</p>
+                <!-- Removed the logo from here -->
+                <p class="mb-2 md:mb-0"><a href="#" class="hover:text-white transition duration-200">Términos y condiciones</a></p>
+                <p>&copy; Maxiclean todos los derechos reservados</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

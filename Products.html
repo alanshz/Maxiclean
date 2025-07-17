@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maxi Clean - Productos</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f5f2; /* Light background similar to design */
+        }
+        /* Active filter styling */
+        .filter-active {
+            font-weight: 600; /* Semi-bold */
+            color: #ea580c; /* Orange-600 */
+        }
+        /* Modal styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border-radius: 0.75rem; /* rounded-xl */
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        /* Notification style */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50; /* Green */
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .notification.show {
+            display: block;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+    <!-- Header Section - Reused from index.html for consistency -->
+    <header class="bg-white shadow-sm py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center max-w-7xl">
+            <!-- Logo -->
+            <div class="flex items-center">
+                <a href="index.html">
+                    <img src="https://www.grupomaxiclean.com/portal/img/GFMC.png" alt="Grupo Ferretero Maxi Clean Logo" class="h-10 sm:h-12 mr-2 onerror='this.onerror=null;this.src=\"https://placehold.co/100x50/D3A575/fff?text=Maxi+Clean\";'">
+                </a>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex space-x-6">
+                <a href="index.html" class="text-blue-700 hover:text-orange-600 font-medium">Inicio</a>
+                <a href="quienes_somos.html" class="text-blue-700 hover:text-orange-600 font-medium">Quiénes Somos</a>
+                <a href="products.html" class="text-orange-600 font-medium">Productos</a> <!-- Active link for products page -->
+                <a href="#" class="text-blue-700 hover:text-orange-600 font-medium">Ofertas</a>
+                <a href="#" class="text-blue-700 hover:text-orange-600 font-medium">Contacto</a>
+            </nav>
+
+            <!-- Icons (Cart and User) -->
+            <div class="flex items-center space-x-4">
+                <button id="cart-button" class="relative text-blue-700 hover:text-orange-600 text-lg focus:outline-none">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                </button>
+                <a href="#" class="text-blue-700 hover:text-orange-600 text-lg">
+                    <i class="fas fa-user"></i>
+                </a>
+                <!-- Hamburger menu for mobile -->
+                <button class="md:hidden text-blue-700 text-lg">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 max-w-7xl">
+        <h1 class="text-4xl font-bold text-gray-800 mb-8 text-center">Nuestros Productos</h1>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Sidebar for Filters -->
+            <aside class="w-full lg:w-1/4 bg-white p-6 rounded-xl shadow-md">
+                <h3 class="text-2xl font-semibold text-gray-800 mb-6">Categorías</h3>
+                <ul id="category-filters" class="space-y-3 mb-8">
+                    <li><a href="#" class="category-filter text-gray-700 hover:text-orange-600 font-medium filter-active" data-category="all">Todas las categorías</a></li>
+                    <li><a href="#" class="category-filter text-gray-700 hover:text-orange-600 font-medium" data-category="herramientas-manuales">Herramientas manuales</a></li>
+                    <li><a href="#" class="category-filter text-gray-700 hover:text-orange-600 font-medium" data-category="herramientas-electricas">Herramientas eléctricas</a></li>
+                    <li><a href="#" class="category-filter text-gray-700 hover:text-orange-600 font-medium" data-category="suministros-construccion">Suministros de construcción</a></li>
+                    <li><a href="#" class="category-filter text-gray-700 hover:text-orange-600 font-medium" data-category="ferreteria-jardin">Ferretería para jardín</a></li>
+                    <li><a href="#" class="category-filter text-gray-700 hover:text-orange-600 font-medium" data-category="seguridad-proteccion">Seguridad y protección</a></li>
+                    <li><a href="#" class="category-filter text-gray-700 hover:text-orange-600 font-medium" data-category="pinturas">Pinturas</a></li>
+                    <li><a href="#" class="category-filter text-gray-700 hover:text-orange-600 font-medium" data-category="fontaneria">Fontanería</a></li>
+                </ul>
+
+                <h3 class="text-2xl font-semibold text-gray-800 mb-6">Etiquetas</h3>
+                <ul id="tag-filters" class="space-y-3 mb-8">
+                    <li><a href="#" class="tag-filter text-gray-700 hover:text-orange-600 font-medium filter-active" data-tag="all">Todas las etiquetas</a></li>
+                    <li><a href="#" class="tag-filter text-gray-700 hover:text-orange-600 font-medium" data-tag="bricolaje">Bricolaje</a></li>
+                    <li><a href="#" class="tag-filter text-gray-700 hover:text-orange-600 font-medium" data-tag="profesional">Profesional</a></li>
+                    <li><a href="#" class="tag-filter text-gray-700 hover:text-orange-600 font-medium" data-tag="hogar">Hogar</a></li>
+                    <li><a href="#" class="tag-filter text-gray-700 hover:text-orange-600 font-medium" data-tag="exterior">Exterior</a></li>
+                    <li><a href="#" class="tag-filter text-gray-700 hover:text-orange-600 font-medium" data-tag="interior">Interior</a></li>
+                </ul>
+
+                <h3 class="text-2xl font-semibold text-gray-800 mb-6">Marcas</h3>
+                <ul id="supplier-filters" class="space-y-3 mb-8">
+                    <li><a href="#" class="supplier-filter text-gray-700 hover:text-orange-600 font-medium filter-active" data-supplier="all">Todas las marcas</a></li>
+                    <li><a href="#" class="supplier-filter text-gray-700 hover:text-orange-600 font-medium" data-supplier="aksi">AKSI</a></li>
+                    <li><a href="#" class="supplier-filter text-gray-700 hover:text-orange-600 font-medium" data-supplier="doal">DOAL</a></li>
+                    <li><a href="#" class="supplier-filter text-gray-700 hover:text-orange-600 font-medium" data-supplier="surtek">SURTEK</a></li>
+                    <li><a href="#" class="supplier-filter text-gray-700 hover:text-orange-600 font-medium" data-supplier="3m">3M</a></li>
+                    <li><a href="#" class="supplier-filter text-gray-700 hover:text-orange-600 font-medium" data-supplier="epcom">EPCOM</a></li>
+                    <li><a href="#" class="supplier-filter text-gray-700 hover:text-orange-600 font-medium" data-supplier="coppel">COPPEL</a></li>
+                    <li><a href="#" class="supplier-filter text-gray-700 hover:text-orange-600 font-medium" data-supplier="maxtool">MAXTOOL</a></li>
+                    <li><a href="#" class="supplier-filter text-gray-700 hover:text-orange-600 font-medium" data-supplier="homedepot">HOMEDEPOT</a></li>
+                    <li><a href="#" class="supplier-filter text-gray-700 hover:text-orange-600 font-medium" data-supplier="itsamexico">ITSAMEXICO</a></li>
+                </ul>
+
+                <h3 class="text-2xl font-semibold text-gray-800 mb-6">Rango de precios</h3>
+                <div class="flex items-center space-x-2 mb-4">
+                    <input type="number" id="price-min" placeholder="De" class="w-1/2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <span class="text-gray-600">-</span>
+                    <input type="number" id="price-max" placeholder="Hasta" class="w-1/2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+                <button id="apply-price-filter" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2 rounded-md transition duration-300">
+                    Aplicar
+                </button>
+                <!-- New Clear Filters Button -->
+                <button id="clear-filters-button" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 rounded-md transition duration-300 mt-4">
+                    Borrar Filtros
+                </button>
+            </aside>
+
+            <!-- Product Grid -->
+            <section class="w-full lg:w-3/4">
+                <!-- Search Bar -->
+                <div class="mb-6">
+                    <div class="relative">
+                        <input type="text" id="product-search" placeholder="Buscar productos..." class="w-full p-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-800"><span id="product-count">10</span> Productos</h2>
+                </div>
+
+                <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Product Item 1: Cutter -->
+                    <div class="product-item bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-lg" data-category="herramientas-manuales" data-tags="bricolaje,profesional" data-supplier="maxtool" data-price="12.50" data-product-id="cutter-1">
+                        <img src="https://ferreteriawitzi.com/cdn/shop/files/cutter-para-acrilico-maxtool-maxtool-992997.jpg?v=1717030159" alt="Cutter para Acrílico" class="w-full h-36 object-cover">
+                        <div class="p-4">
+                            <h4 class="font-semibold text-gray-800 mb-1">Cutter</h4>
+                            <p class="text-gray-600 text-sm mb-2">Stock: 50 unidades</p>
+                            <p class="text-orange-600 font-bold mb-3">$ 12.50</p>
+                            <button class="add-to-cart-button w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-md transition duration-300">
+                                <i class="fas fa-cart-plus mr-2"></i>Agregar al carrito
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Product Item 2: Destornillador Rba-31 -->
+                    <div class="product-item bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-lg" data-category="herramientas-manuales" data-tags="bricolaje,hogar" data-supplier="coppel" data-price="10.00" data-product-id="destornillador-rba-31">
+                        <img src="https://cdn1.coppel.com/images/catalog/pm/5899953-1.jpg" alt="Destornillador" class="w-full h-36 object-cover">
+                        <div class="p-4">
+                            <h4 class="font-semibold text-gray-800 mb-1">Destornillador Rba-31</h4>
+                            <p class="text-gray-600 text-sm mb-2">Stock: 120 unidades</p>
+                            <p class="text-orange-600 font-bold mb-3">$ 10.00</p>
+                            <button class="add-to-cart-button w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-md transition duration-300">
+                                <i class="fas fa-cart-plus mr-2"></i>Agregar al carrito
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Product Item 3: Pinzas de Punta -->
+                    <div class="product-item bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-lg" data-category="herramientas-manuales" data-tags="profesional" data-supplier="aksi" data-price="22.00" data-product-id="pinzas-punta">
+                        <img src="https://shop.aksi.com.mx/cdn/shop/products/304108.jpg?v=1678917412" alt="Pinzas de Punta" class="w-full h-36 object-cover">
+                        <div class="p-4">
+                            <h4 class="font-semibold text-gray-800 mb-1">Pinzas de Punta</h4>
+                            <p class="text-gray-600 text-sm mb-2">Stock: 75 unidades</p>
+                            <p class="text-orange-600 font-bold mb-3">$ 22.00</p>
+                            <button class="add-to-cart-button w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-md transition duration-300">
+                                <i class="fas fa-cart-plus mr-2"></i>Agregar al carrito
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Product Item 4: Llave Inglesa -->
+                    <div class="product-item bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-lg" data-category="herramientas-manuales" data-tags="bricolaje" data-supplier="chedraui" data-price="15.00" data-product-id="llave-inglesa">
+                        <img src="https://chedrauimx.vtexassets.com/arquivos/ids/49167390-800-auto?v=638845774631200000&width=800&height=auto&aspect=true" alt="Llave Inglesa Ajustable" class="w-full h-36 object-cover">
+                        <div class="p-4">
+                            <h4 class="font-semibold text-gray-800 mb-1">Llave Inglesa</h4>
+                            <p class="text-gray-600 text-sm mb-2">Stock: 40 unidades</p>
+                            <p class="text-orange-600 font-bold mb-3">$ 15.00</p>
+                            <button class="add-to-cart-button w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-md transition duration-300">
+                                <i class="fas fa-cart-plus mr-2"></i>Agregar al carrito
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Product Item 5: Cinta Métrica -->
+                    <div class="product-item bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-lg" data-category="herramientas-manuales" data-tags="hogar,bricolaje" data-supplier="aksi" data-price="8.50" data-product-id="cinta-metrica">
+                        <img src="https://shop.aksi.com.mx/cdn/shop/products/301632.jpg?v=1678815469" alt="Cinta Métrica" class="w-full h-36 object-cover">
+                        <div class="p-4">
+                            <h4 class="font-semibold text-gray-800 mb-1">Cinta Métrica</h4>
+                            <p class="text-gray-600 text-sm mb-2">Stock: 90 unidades</p>
+                            <p class="text-orange-600 font-bold mb-3">$ 8.50</p>
+                            <button class="add-to-cart-button w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-md transition duration-300">
+                                <i class="fas fa-cart-plus mr-2"></i>Agregar al carrito
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Product Item 6: Llave para Tubos (Stillson) -->
+                    <div class="product-item bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-lg" data-category="herramientas-manuales" data-tags="profesional,fontaneria" data-supplier="mlstatic" data-price="45.00" data-product-id="llave-tubos">
+                        <img src="https://http2.mlstatic.com/D_NQ_NP_667969-MLM77893949452_082024-O-llave-stillson-de-hierro-maleable-de-14-pulgadas.webp" alt="Llave Stillson" class="w-full h-36 object-cover">
+                        <div class="p-4">
+                            <h4 class="font-semibold text-gray-800 mb-1">Llave para Tubos (Stillson)</h4>
+                            <p class="text-gray-600 text-sm mb-2">Stock: 30 unidades</p>
+                            <p class="text-orange-600 font-bold mb-3">$ 45.00</p>
+                            <button class="add-to-cart-button w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-md transition duration-300">
+                                <i class="fas fa-cart-plus mr-2"></i>Agregar al carrito
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Product Item 7: Taladro Inalámbrico -->
+                    <div class="product-item bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-lg" data-category="herramientas-electricas" data-tags="profesional,bricolaje" data-supplier="homedepot" data-price="180.00" data-product-id="taladro-inalambrico">
+                        <img src="https://cdn.homedepot.com.mx/productos/145339/145339-d.jpg" alt="Taladro Inalámbrico" class="w-full h-36 object-cover">
+                        <div class="p-4">
+                            <h4 class="font-semibold text-gray-800 mb-1">Taladro Inalámbrico</h4>
+                            <p class="text-gray-600 text-sm mb-2">Stock: 25 unidades</p>
+                            <p class="text-orange-600 font-bold mb-3">$ 180.00</p>
+                            <button class="add-to-cart-button w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-md transition duration-300">
+                                <i class="fas fa-cart-plus mr-2"></i>Agregar al carrito
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Product Item 8: Juego de Brocas -->
+                    <div class="product-item bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-lg" data-category="herramientas-electricas" data-tags="bricolaje,profesional" data-supplier="homedepot" data-price="35.00" data-product-id="juego-brocas">
+                        <img src="https://cdn.homedepot.com.mx/productos/197723/197723-d.jpg" alt="Juego de Brocas" class="w-full h-36 object-cover">
+                        <div class="p-4">
+                            <h4 class="font-semibold text-gray-800 mb-1">Juego de Brocas</h4>
+                            <p class="text-gray-600 text-sm mb-2">Stock: 60 unidades</p>
+                            <p class="text-orange-600 font-bold mb-3">$ 35.00</p>
+                            <button class="add-to-cart-button w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-md transition duration-300">
+                                <i class="fas fa-cart-plus mr-2"></i>Agregar al carrito
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Product Item 9: Tubería PVC -->
+                    <div class="product-item bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-lg" data-category="suministros-construccion" data-tags="fontaneria,hogar" data-supplier="itsamexico" data-price="25.00" data-product-id="tuberia-pvc">
+                        <img src="https://www.itsamexico.com/web/image/product.template/11884/image_1920?unique=f05e5f3" alt="Tubería PVC Sanitaria" class="w-full h-36 object-cover">
+                        <div class="p-4">
+                            <h4 class="font-semibold text-gray-800 mb-1">Tubería PVC Sanitaria</h4>
+                            <p class="text-gray-600 text-sm mb-2">Stock: 80 unidades</p>
+                            <p class="text-orange-600 font-bold mb-3">$ 25.00</p>
+                            <button class="add-to-cart-button w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-md transition duration-300">
+                                <i class="fas fa-cart-plus mr-2"></i>Agregar al carrito
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Product Item 10: Pintura Vinil-Acrílica DOAL -->
+                    <div class="product-item bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-lg" data-category="pinturas" data-tags="hogar,interior" data-supplier="doal" data-price="60.00" data-product-id="pintura-doal">
+                        <img src="https://pinturasdoal.com/wp-content/uploads/102102100-1.jpg" alt="Pintura Vinil-Acrílica DOAL" class="w-full h-36 object-cover">
+                        <div class="p-4">
+                            <h4 class="font-semibold text-gray-800 mb-1">Pintura Vinil-Acrílica DOAL</h4>
+                            <p class="text-gray-600 text-sm mb-2">Stock: 150 unidades</p>
+                            <p class="text-orange-600 font-bold mb-3">$ 60.00</p>
+                            <button class="add-to-cart-button w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-md transition duration-300">
+                                <i class="fas fa-cart-plus mr-2"></i>Agregar al carrito
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="flex justify-center items-center space-x-2 mt-8">
+                    <a href="#" class="px-3 py-2 rounded-md bg-orange-600 text-white font-medium">1</a>
+                    <a href="#" class="px-3 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium">2</a>
+                    <a href="#" class="px-3 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium">3</a>
+                    <a href="#" class="px-3 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium">4</a>
+                    <span class="px-3 py-2 text-gray-700">...</span>
+                    <a href="#" class="px-3 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium">10</a>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Disclaimer Section -->
+    <section class="bg-yellow-100 text-yellow-800 p-4 rounded-lg shadow-md mx-4 md:mx-auto max-w-7xl mb-8">
+        <p class="text-center text-sm">
+            <strong>Disclaimer:</strong> Todos los precios mostrados no cuentan con IVA y están sujetos a cambio sin previo aviso, para mas informacion favor de verificar la disponibilidad y precio con su vendedor.
+        </p>
+    </section>
+
+    <!-- Brands Section - Replicated from index.html -->
+    <section class="bg-white py-12 rounded-xl mx-4 md:mx-auto max-w-7xl shadow-md mb-8">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8">TRABAJAMOS CON GRANDES MARCAS</h2>
+            <div class="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+                <!-- AKSI Logo -->
+                <img src="https://www.aksi.com.mx/img/Content/logo.png" alt="AKSI Logo" class="h-16 object-contain transform transition duration-300 hover:scale-110 onerror='this.onerror=null;this.src=\"https://placehold.co/100x50/D3A575/fff?text=AKSI\";'">
+                <!-- DOAL Logo -->
+                <img src="https://pinturasdoal.com/wp-content/uploads/doal-logo.png" alt="DOAL Logo" class="h-40 object-contain transform transition duration-300 hover:scale-110 onerror='this.onerror=null;this.src=\"https://placehold.co/100x50/D3A575/fff?text=DOAL\";'">
+                <!-- Generic Ferreteria Brand Logo -->
+                <img src="https://refaccionariamario.com/img/m/17.jpg" alt="Marca de Ferretería Genérica" class="h-16 object-contain transform transition duration-300 hover:scale-110 onerror='this.onerror=null;this.src=\"https://placehold.co/100x50/D3A575/fff?text=EPCOM\";'">
+                <!-- SURTEK Logo -->
+                <img src="https://c.cdnmp.net/179020903/brands/1002061_logo.png" alt="SURTEK Logo" class="h-20 object-contain transform transition duration-300 hover:scale-110 onerror='this.onerror=null;this.src=\"https://placehold.co/100x50/D3A575/fff?text=SURTEK\";'">
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Section - Reused from index.html for consistency -->
+    <footer class="bg-gray-800 text-gray-300 py-10 rounded-t-xl mt-8">
+        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8 max-w-7xl">
+            <!-- Company Column -->
+            <div>
+                <h4 class="text-white font-semibold text-lg mb-4">Compañía</h4>
+                <ul>
+                    <li class="mb-2"><a href="quienes_somos.html" class="hover:text-white transition duration-200">Sobre nosotros</a></li>
+                    <li class="mb-2"><a href="#" class="hover:text-white transition duration-200">Iniciar sesión</a></li>
+                </ul>
+            </div>
+
+            <!-- Account Column -->
+            <div>
+                <h4 class="text-white font-semibold text-lg mb-4">Cuenta</h4>
+                <ul>
+                    <li class="mb-2"><a href="#" class="hover:text-white transition duration-200">Crear cuenta</a></li>
+                    <li class="mb-2"><a href="#" class="hover:text-white transition duration-200">Acceso</a></li>
+                </ul>
+            </div>
+
+            <!-- Support Column -->
+            <div>
+                <h4 class="text-white font-semibold text-lg mb-4">Apoyo</h4>
+                <ul>
+                    <li class="mb-2"><a href="#" class="hover:text-white transition duration-200">Contacto</a></li>
+                    <li class="mb-2"><a href="#" class="hover:text-white transition duration-200">Solicitar productos</a></li>
+                </ul>
+            </div>
+
+            <!-- About Maxi Clean Column -->
+            <div class="md:col-span-1">
+                <h4 class="text-white font-semibold text-lg mb-4">Sobre Maxi Clean</h4>
+                <p>Maxiclean es una ferretería que cuenta con años de experiencia brindándole los mejores productos de las mejores marcas.</p>
+            </div>
+        </div>
+
+        <!-- Footer Bottom Bar -->
+        <div class="border-t border-gray-700 mt-8 pt-6">
+            <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center text-sm text-gray-400 max-w-7xl">
+                <p class="mb-2 md:mb-0">Fidel Velázquez 157, Joyas del Pedregal, Apodaca</p>
+                <p class="mb-2 md:mb-0"><a href="#" class="hover:text-white transition duration-200">Términos y condiciones</a></p>
+                <p>&copy; Maxiclean todos los derechos reservados</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Shopping Cart Modal -->
+    <div id="cart-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Tu Carrito de Compras</h2>
+            <div id="cart-items" class="mb-4 max-h-60 overflow-y-auto">
+                <!-- Cart items will be dynamically added here -->
+                <p class="text-gray-600" id="empty-cart-message">Tu carrito está vacío.</p>
+            </div>
+            <div class="border-t border-gray-200 pt-4">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-700 font-medium">Subtotal:</span>
+                    <span id="cart-subtotal" class="text-gray-800 font-semibold">$0.00</span>
+                </div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-700 font-medium">IVA (16%):</span>
+                    <span id="cart-iva" class="text-gray-800 font-semibold">$0.00</span>
+                </div>
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-xl text-gray-800 font-bold">Total:</span>
+                    <span id="cart-total" class="text-xl text-orange-600 font-bold">$0.00</span>
+                </div>
+                <button id="checkout-button" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-md transition duration-300">
+                    Proceder al Pago
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add to Cart Notification -->
+    <div id="add-to-cart-notification" class="notification">
+        Producto agregado al carrito!
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('product-search');
+            const categoryFilters = document.querySelectorAll('.category-filter');
+            const tagFilters = document.querySelectorAll('.tag-filter');
+            const supplierFilters = document.querySelectorAll('.supplier-filter');
+            const productItems = document.querySelectorAll('.product-item');
+            const productCountElement = document.getElementById('product-count');
+            const priceMinInput = document.getElementById('price-min');
+            const priceMaxInput = document.getElementById('price-max');
+            const applyPriceFilterButton = document.getElementById('apply-price-filter');
+            const clearFiltersButton = document.getElementById('clear-filters-button'); // New: Clear Filters button
+
+            // Cart elements
+            const cartButton = document.getElementById('cart-button');
+            const cartCountElement = document.getElementById('cart-count');
+            const cartModal = document.getElementById('cart-modal');
+            const closeModalButton = document.querySelector('.close-button');
+            const cartItemsContainer = document.getElementById('cart-items');
+            const emptyCartMessage = document.getElementById('empty-cart-message');
+            const cartSubtotalElement = document.getElementById('cart-subtotal');
+            const cartIVAElement = document.getElementById('cart-iva');
+            const cartTotalElement = document.getElementById('cart-total');
+            const addToCartButtons = document.querySelectorAll('.add-to-cart-button');
+
+            // Notification element
+            const addToCartNotification = document.getElementById('add-to-cart-notification');
+
+            let activeCategory = 'all';
+            let activeTag = 'all';
+            let activeSupplier = 'all';
+            let minPrice = null;
+            let maxPrice = null;
+
+            // Shopping Cart Array
+            let cart = [];
+            const IVA_RATE = 0.16; // 16% IVA
+
+            // Function to filter products
+            const filterProducts = () => {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                let visibleProductCount = 0;
+
+                productItems.forEach(item => {
+                    const productName = item.querySelector('h4').textContent.toLowerCase();
+                    const itemCategory = item.dataset.category;
+                    const itemTags = item.dataset.tags ? item.dataset.tags.toLowerCase().split(',') : [];
+                    const itemSupplier = item.dataset.supplier;
+                    const itemPrice = parseFloat(item.dataset.price);
+
+                    const matchesSearch = productName.includes(searchTerm) || itemTags.some(tag => tag.includes(searchTerm)) || itemSupplier.includes(searchTerm);
+                    const matchesCategory = activeCategory === 'all' || itemCategory === activeCategory;
+                    const matchesTag = activeTag === 'all' || itemTags.includes(activeTag);
+                    const matchesSupplier = activeSupplier === 'all' || itemSupplier === activeSupplier;
+                    const matchesPrice = (minPrice === null || itemPrice >= minPrice) && (maxPrice === null || itemPrice <= maxPrice);
+
+                    if (matchesSearch && matchesCategory && matchesTag && matchesSupplier && matchesPrice) {
+                        item.style.display = ''; // Show the product
+                        visibleProductCount++;
+                    } else {
+                        item.style.display = 'none'; // Hide the product
+                    }
+                });
+                productCountElement.textContent = visibleProductCount;
+            };
+
+            // Function to update cart display and total
+            const updateCartDisplay = () => {
+                cartItemsContainer.innerHTML = ''; // Clear current cart items
+                let subtotal = 0;
+
+                if (cart.length === 0) {
+                    emptyCartMessage.style.display = 'block';
+                } else {
+                    emptyCartMessage.style.display = 'none';
+                    cart.forEach(item => {
+                        const itemTotal = item.price * item.quantity;
+                        subtotal += itemTotal;
+
+                        const cartItemDiv = document.createElement('div');
+                        cartItemDiv.classList.add('flex', 'justify-between', 'items-center', 'py-2', 'border-b', 'border-gray-100');
+                        cartItemDiv.innerHTML = `
+                            <div class="flex-1">
+                                <p class="text-gray-800 font-medium">${item.name}</p>
+                                <p class="text-gray-600 text-sm">$${item.price.toFixed(2)} x ${item.quantity}</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button class="remove-from-cart-button text-red-500 hover:text-red-700 text-lg" data-product-id="${item.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <span class="text-gray-800 font-semibold">$${itemTotal.toFixed(2)}</span>
+                            </div>
+                        `;
+                        cartItemsContainer.appendChild(cartItemDiv);
+                    });
+                }
+
+                const ivaAmount = subtotal * IVA_RATE;
+                const total = subtotal + ivaAmount;
+
+                cartSubtotalElement.textContent = `$${subtotal.toFixed(2)}`;
+                cartIVAElement.textContent = `$${ivaAmount.toFixed(2)}`;
+                cartTotalElement.textContent = `$${total.toFixed(2)}`;
+                cartCountElement.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+            };
+
+            // Function to show the "Added to cart" notification
+            const showAddToCartNotification = () => {
+                addToCartNotification.classList.add('show');
+                setTimeout(() => {
+                    addToCartNotification.classList.remove('show');
+                }, 3000); // Hide after 3 seconds
+            };
+
+            // Function to add a product to the cart
+            const addProductToCart = (productId, productName, productPrice) => {
+                // Debug log to see what's being added
+                console.log(`Intentando agregar: ID=${productId}, Nombre=${productName}, Precio=${productPrice}`);
+
+                const existingItem = cart.find(item => item.id === productId);
+                if (existingItem) {
+                    existingItem.quantity++;
+                    console.log(`Cantidad incrementada para: ${productName}, nueva cantidad: ${existingItem.quantity}`);
+                } else {
+                    cart.push({ id: productId, name: productName, price: productPrice, quantity: 1 });
+                    console.log(`Nuevo producto agregado: ${productName}`);
+                }
+                updateCartDisplay();
+                showAddToCartNotification(); // Show notification
+            };
+
+            // Function to remove a product from the cart
+            const removeProductFromCart = (productId) => {
+                cart = cart.filter(item => item.id !== productId);
+                updateCartDisplay();
+            };
+
+            // Function to reset all filters
+            const resetFilters = () => {
+                // Reset active filter variables
+                activeCategory = 'all';
+                activeTag = 'all';
+                activeSupplier = 'all';
+                minPrice = null;
+                maxPrice = null;
+
+                // Clear search input
+                searchInput.value = '';
+
+                // Clear price range inputs
+                priceMinInput.value = '';
+                priceMaxInput.value = '';
+
+                // Reset active classes for category filters
+                categoryFilters.forEach(f => f.classList.remove('filter-active'));
+                document.querySelector('[data-category="all"]').classList.add('filter-active');
+
+                // Reset active classes for tag filters
+                tagFilters.forEach(f => f.classList.remove('filter-active'));
+                document.querySelector('[data-tag="all"]').classList.add('filter-active');
+
+                // Reset active classes for supplier filters
+                supplierFilters.forEach(f => f.classList.remove('filter-active'));
+                document.querySelector('[data-supplier="all"]').classList.add('filter-active');
+
+                // Re-filter products to show all
+                filterProducts();
+            };
+
+            // Event listener for search input
+            searchInput.addEventListener('keyup', filterProducts);
+
+            // Event listeners for category filters
+            categoryFilters.forEach(filter => {
+                filter.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    categoryFilters.forEach(f => f.classList.remove('filter-active'));
+                    filter.classList.add('filter-active');
+                    activeCategory = filter.dataset.category;
+                    filterProducts();
+                });
+            });
+
+            // Event listeners for tag filters
+            tagFilters.forEach(filter => {
+                filter.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    tagFilters.forEach(f => f.classList.remove('filter-active'));
+                    filter.classList.add('filter-active');
+                    activeTag = filter.dataset.tag;
+                    filterProducts();
+                });
+            });
+
+            // Event listeners for supplier filters
+            supplierFilters.forEach(filter => {
+                filter.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    supplierFilters.forEach(f => f.classList.remove('filter-active'));
+                    filter.classList.add('filter-active');
+                    activeSupplier = filter.dataset.supplier;
+                    filterProducts();
+                });
+            });
+
+            // Event listener for price range filter
+            applyPriceFilterButton.addEventListener('click', () => {
+                minPrice = priceMinInput.value === '' ? null : parseFloat(priceMinInput.value);
+                maxPrice = priceMaxInput.value === '' ? null : parseFloat(priceMaxInput.value);
+                filterProducts();
+            });
+
+            // Event listener for Clear Filters button
+            clearFiltersButton.addEventListener('click', resetFilters);
+
+            // Event listeners for "Add to Cart" buttons
+            addToCartButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productItem = e.target.closest('.product-item');
+                    const productId = productItem.dataset.productId;
+                    const productName = productItem.querySelector('h4').textContent;
+                    const productPrice = parseFloat(productItem.dataset.price);
+                    addProductToCart(productId, productName, productPrice);
+                });
+            });
+
+            // Event listener for cart button to open modal
+            cartButton.addEventListener('click', () => {
+                cartModal.style.display = 'flex';
+                updateCartDisplay(); // Ensure cart is updated when modal opens
+            });
+
+            // Event listener for close modal button
+            closeModalButton.addEventListener('click', () => {
+                cartModal.style.display = 'none';
+            });
+
+            // Close modal when clicking outside of it
+            window.addEventListener('click', (event) => {
+                if (event.target === cartModal) {
+                    cartModal.style.display = 'none';
+                }
+            });
+
+            // Event listener for removing items from cart within the modal (delegated)
+            cartItemsContainer.addEventListener('click', (e) => {
+                if (e.target.closest('.remove-from-cart-button')) {
+                    const productId = e.target.closest('.remove-from-cart-button').dataset.productId;
+                    removeProductFromCart(productId);
+                }
+            });
+
+            // Initial filter and cart display on page load
+            filterProducts();
+            updateCartDisplay();
+        });
+    </script>
+</body>
+</html>

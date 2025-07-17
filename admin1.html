@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maxi Clean - Panel de Administración</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f5f2; /* Light background similar to main design */
+        }
+        /* Custom styles for sidebar to ensure it's fixed and takes full height */
+        .sidebar {
+            width: 250px; /* Fixed width for sidebar */
+            min-width: 250px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: fixed; /* Ensures it stays in place */
+            top: 0; /* Aligns to the top of the viewport */
+            left: 0; /* Aligns to the left of the viewport */
+            height: 100vh; /* Occupies full viewport height */
+            padding-top: 0;
+            overflow-y: auto; /* Scrollable if content overflows */
+            z-index: 999; /* Ensures it's above other elements */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Push profile to bottom */
+            transition: transform 0.3s ease-in-out; /* Smooth transition for hiding/showing */
+        }
+        .main-content-area {
+            margin-left: 250px; /* Offset for the fixed sidebar */
+            padding: 1.5rem; /* Consistent padding */
+            flex-grow: 1;
+            transition: margin-left 0.3s ease-in-out; /* Smooth transition for margin */
+        }
+
+        /* Styles for when the sidebar is collapsed */
+        body.sidebar-collapsed .sidebar {
+            transform: translateX(-100%); /* Move sidebar off-screen to the left */
+        }
+        body.sidebar-collapsed .main-content-area {
+            margin-left: 0; /* Main content takes full width */
+        }
+
+        /* Adjust for smaller screens */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none; /* Hide sidebar by default on mobile */
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding-top: 0;
+                transform: translateX(0); /* Ensure it's not translated on mobile when hidden */
+            }
+            .main-content-area {
+                margin-left: 0; /* No offset on mobile */
+                padding-top: 0;
+            }
+            /* Show toggle button on mobile too */
+            #toggle-sidebar-button {
+                display: block; /* Ensure it's visible on smaller screens */
+            }
+            body.sidebar-collapsed .sidebar {
+                transform: translateX(-100%); /* Keep it hidden if collapsed on mobile */
+            }
+        }
+
+        /* Modal styles for custom alerts */
+        .message-modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1001; /* Sit on top, above other modals */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+        .message-modal-content {
+            background-color: #fefefe;
+            padding: 20px;
+            border-radius: 0.75rem; /* rounded-xl */
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            position: relative;
+        }
+        .message-modal-content .close-button {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+        .message-modal-content .close-button:hover {
+            color: black;
+        }
+        .message-modal-content h3 {
+            font-size: 1.5rem; /* text-2xl */
+            font-weight: 700; /* font-bold */
+            color: #1f2937; /* gray-800 */
+            margin-bottom: 1rem;
+        }
+        .message-modal-content p {
+            color: #4b5563; /* gray-700 */
+            margin-bottom: 1.5rem;
+        }
+        .message-modal-content button {
+            background-color: #2563eb; /* blue-700 */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem; /* rounded-md */
+            font-weight: 600; /* font-semibold */
+            transition: background-color 0.3s ease;
+        }
+        .message-modal-content button:hover {
+            background-color: #1d4ed8; /* blue-800 */
+        }
+
+        /* Styles for collapsible menu */
+        .collapsible-menu ul {
+            display: none; /* Hidden by default */
+        }
+        .collapsible-menu.active ul {
+            display: block; /* Show when active */
+        }
+        .collapsible-menu .toggle-icon {
+            transition: transform 0.3s ease;
+        }
+        .collapsible-menu.active .toggle-icon {
+            transform: rotate(90deg); /* Rotate icon when active */
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden flex flex-col min-h-screen">
+    <div class="flex flex-1">
+        <!-- Sidebar -->
+        <aside class="sidebar hidden md:flex">
+            <div class="p-4 text-center">
+                <img src="https://www.grupomaxiclean.com/portal/img/GFMC.png" alt="Grupo Ferretero Maxi Clean Logo" class="h-12 mx-auto mb-4 onerror='this.onerror=null;this.src=\"https://placehold.co/100x50/D3A575/fff?text=Maxi+Clean\";'">
+            </div>
+            <nav class="mt-8 flex-grow">
+                <ul>
+                    <!-- Inicio (Dashboard) -->
+                    <li class="mb-2">
+                        <a href="#" id="sidebar-dashboard-link" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200">
+                            <i class="fas fa-home mr-3"></i> Inicio
+                        </a>
+                    </li>
+                    <!-- Pedidos (Moved to second position) -->
+                    <li class="mb-2">
+                        <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200">
+                            <i class="fas fa-box-open mr-3"></i> Pedidos
+                        </a>
+                    </li>
+                    <!-- Almacenes -->
+                    <li class="mb-2 collapsible-menu">
+                        <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200">
+                            <i class="fas fa-warehouse mr-3"></i> Almacenes
+                            <i class="fas fa-chevron-right ml-auto text-xs toggle-icon"></i>
+                        </a>
+                        <ul class="ml-6 mt-1">
+                            <li class="mb-1">
+                                <a href="#" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200" data-warehouse="1">
+                                    <i class="fas fa-warehouse mr-3 text-sm"></i> Almacen 1
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="#" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200" data-warehouse="2">
+                                    <i class="fas fa-warehouse mr-3 text-sm"></i> Almacen 2
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- Productos -->
+                    <li class="mb-2 collapsible-menu">
+                        <a href="#" id="sidebar-products-link" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200">
+                            <i class="fas fa-tools mr-3"></i> Productos
+                            <i class="fas fa-chevron-right ml-auto text-xs toggle-icon"></i>
+                        </a>
+                        <ul class="ml-6 mt-1">
+                            <li class="mb-1">
+                                <a href="#" id="sidebar-new-product-link" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200">
+                                    <i class="fas fa-plus-circle mr-3 text-sm"></i> Nuevo
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- Clientes -->
+                    <li class="mb-2 collapsible-menu">
+                        <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200">
+                            <i class="fas fa-users mr-3"></i> Clientes
+                            <i class="fas fa-chevron-right ml-auto text-xs toggle-icon"></i>
+                        </a>
+                        <ul class="ml-6 mt-1">
+                            <li class="mb-1">
+                                <a href="#" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200">
+                                    <i class="fas fa-file-invoice-dollar mr-3 text-sm"></i> Estados de Cuenta
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="#" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200">
+                                    <i class="fas fa-user-plus mr-3 text-sm"></i> Registrar
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- Empleados -->
+                    <li class="mb-2 collapsible-menu">
+                        <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200">
+                            <i class="fas fa-user-tie mr-3"></i> Empleados
+                            <i class="fas fa-chevron-right ml-auto text-xs toggle-icon"></i>
+                        </a>
+                        <ul class="ml-6 mt-1">
+                            <li class="mb-1">
+                                <a href="#" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200">
+                                    <i class="fas fa-money-check-alt mr-3 text-sm"></i> Nominas
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="#" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200">
+                                    <i class="fas fa-user-plus mr-3 text-sm"></i> Registrar
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- Vendedores -->
+                    <li class="mb-2 collapsible-menu">
+                        <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200">
+                            <i class="fas fa-handshake mr-3"></i> Vendedores
+                            <i class="fas fa-chevron-right ml-auto text-xs toggle-icon"></i>
+                        </a>
+                        <ul class="ml-6 mt-1">
+                            <li class="mb-1">
+                                <a href="#" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200">
+                                    <i class="fas fa-bullseye mr-3 text-sm"></i> Metas
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="#" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200">
+                                    <i class="fas fa-plus-circle mr-3 text-sm"></i> Nuevo
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- Rutas (Now a collapsible menu) -->
+                    <li class="mb-2 collapsible-menu">
+                        <a href="#" id="sidebar-routes-link" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200">
+                            <i class="fas fa-route mr-3"></i> Rutas
+                            <i class="fas fa-chevron-right ml-auto text-xs toggle-icon"></i>
+                        </a>
+                        <ul class="ml-6 mt-1">
+                            <!-- Zonas (also a collapsible menu) -->
+                            <li class="mb-1 collapsible-menu">
+                                <a href="#" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200">
+                                    <i class="fas fa-map-marked-alt mr-3 text-sm"></i> Zonas
+                                    <i class="fas fa-chevron-right ml-auto text-xs toggle-icon"></i>
+                                </a>
+                                <ul class="ml-6 mt-1">
+                                    <li class="mb-1">
+                                        <a href="#" class="flex items-center px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200" data-route-zone="Norte">
+                                            <i class="fas fa-compass mr-3 text-xs"></i> Norte
+                                        </a>
+                                    </li>
+                                    <li class="mb-1">
+                                        <a href="#" class="flex items-center px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200" data-route-zone="Sur">
+                                            <i class="fas fa-compass mr-3 text-xs"></i> Sur
+                                        </a>
+                                    </li>
+                                    <li class="mb-1">
+                                        <a href="#" class="flex items-center px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200" data-route-zone="Oriente">
+                                            <i class="fas fa-compass mr-3 text-xs"></i> Oriente
+                                        </a>
+                                    </li>
+                                    <li class="mb-1">
+                                        <a href="#" class="flex items-center px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200" data-route-zone="Poniente">
+                                            <i class="fas fa-compass mr-3 text-xs"></i> Poniente
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+            <div class="p-4 border-t border-gray-200">
+                <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-700 rounded-md transition duration-200 mb-2">
+                    <i class="fas fa-cog mr-3"></i> Configuraciones
+                </a>
+                <button id="admin-logout-button" class="flex items-center w-full px-4 py-2 text-red-600 hover:bg-red-100 rounded-md transition duration-200">
+                    <i class="fas fa-sign-out-alt mr-3"></i> Salir
+                </button>
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-gray-600 font-semibold" id="admin-user-display">Carlos Vazquez</p>
+                    <p class="text-xs text-gray-500">Online</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content-area flex-grow p-8">
+            <!-- Toggle Sidebar Button -->
+            <button id="toggle-sidebar-button" class="fixed top-4 left-[260px] z-50 bg-blue-500 text-white p-2 rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div id="dynamic-content-area" class="container mx-auto max-w-full">
+                <!-- Initial Dashboard Content - This will be loaded dynamically or from JS -->
+                <div id="dashboard-content" style="display: none;">
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-xl shadow-md p-6 flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Total de pedidos</p>
+                                <p class="text-3xl font-bold text-gray-800">500</p>
+                            </div>
+                            <i class="fas fa-shopping-cart text-4xl text-blue-500"></i>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-md p-6 flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Pedidos Pendientes</p>
+                                <p class="text-3xl font-bold text-gray-800">231</p>
+                            </div>
+                            <i class="fas fa-hourglass-half text-4xl text-orange-500"></i>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-md p-6 flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Total de ganancias</p>
+                                <p class="text-3xl font-bold text-gray-800">800,00</p>
+                            </div>
+                            <i class="fas fa-dollar-sign text-4xl text-green-500"></i>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-md p-6 flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Total de Clientes</p>
+                                <p class="text-3xl font-bold text-gray-800">120</p>
+                            </div>
+                            <i class="fas fa-users text-4xl text-purple-500"></i>
+                        </div>
+                    </div>
+
+                    <!-- Pending Orders Section -->
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-2xl font-bold text-gray-800">PEDIDOS PENDIENTES</h2>
+                            <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition duration-300">
+                                <i class="fas fa-sync-alt mr-2"></i> Actualizar
+                            </button>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white rounded-lg overflow-hidden" id="pending-orders-table">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="py-3 px-4 text-left text-gray-600 font-semibold text-sm">Pedidos ID</th>
+                                        <th class="py-3 px-4 text-left text-gray-600 font-semibold text-sm">Cliente ID</th>
+                                        <th class="py-3 px-4 text-left text-gray-600 font-semibold text-sm">Fecha de pedido</th>
+                                        <th class="py-3 px-4 text-left text-gray-600 font-semibold text-sm">Fecha de entrega</th>
+                                        <th class="py-3 px-4 text-left text-gray-600 font-semibold text-sm">Método de pago</th>
+                                        <th class="py-3 px-4 text-left text-gray-600 font-semibold text-sm">Monto</th>
+                                        <th class="py-3 px-4 text-left text-gray-600 font-semibold text-sm">Estado</th>
+                                        <th class="py-3 px-4 text-left text-gray-600 font-semibold text-sm">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Example rows from Admin1.pdf, added data-status for JS logic -->
+                                    <tr class="border-b border-gray-200" data-status="Pendiente">
+                                        <td class="py-3 px-4 text-gray-700">1</td>
+                                        <td class="py-3 px-4 text-gray-700">002</td>
+                                        <td class="py-3 px-4 text-gray-700">10/12/2022</td>
+                                        <td class="py-3 px-4 text-gray-700">-/-/-</td>
+                                        <td class="py-3 px-4 text-gray-700">Tarjeta</td>
+                                        <td class="py-3 px-4 text-gray-700">120</td>
+                                        <td class="py-3 px-4 order-status-text">Pendiente</td>
+                                        <td class="py-3 px-4">
+                                            <button class="bg-blue-500 hover:bg-blue-600 text-white text-sm py-1 px-3 rounded-md transition duration-300">Editar</button>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200" data-status="Urgente">
+                                        <td class="py-3 px-4 text-gray-700">2</td>
+                                        <td class="py-3 px-4 text-gray-700">003</td>
+                                        <td class="py-3 px-4 text-gray-700">11/12/2022</td>
+                                        <td class="py-3 px-4 text-gray-700">12/12/2022</td>
+                                        <td class="py-3 px-4 text-gray-700">Efectivo</td>
+                                        <td class="py-3 px-4 text-gray-700">250</td>
+                                        <td class="py-3 px-4 order-status-text">Urgente</td>
+                                        <td class="py-3 px-4">
+                                            <button class="bg-blue-500 hover:bg-blue-600 text-white text-sm py-1 px-3 rounded-md transition duration-300">Editar</button>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200" data-status="Completado">
+                                        <td class="py-3 px-4 text-gray-700">3</td>
+                                        <td class="py-3 px-4 text-gray-700">004</td>
+                                        <td class="py-3 px-4 text-gray-700">09/12/2022</td>
+                                        <td class="py-3 px-4 text-gray-700">09/12/2022</td>
+                                        <td class="py-3 px-4 text-gray-700">Tarjeta</td>
+                                        <td class="py-3 px-4 text-gray-700">80</td>
+                                        <td class="py-3 px-4 order-status-text">Completado</td>
+                                        <td class="py-3 px-4">
+                                            <button class="bg-blue-500 hover:bg-blue-600 text-white text-sm py-1 px-3 rounded-md transition duration-300">Editar</button>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200" data-status="Pendiente">
+                                        <td class="py-3 px-4 text-gray-700">1</td>
+                                        <td class="py-3 px-4 text-gray-700">002</td>
+                                        <td class="py-3 px-4 text-gray-700">10/12/2022</td>
+                                        <td class="py-3 px-4 text-gray-700">-/-/-</td>
+                                        <td class="py-3 px-4 text-gray-700">Tarjeta</td>
+                                        <td class="py-3 px-4 text-gray-700">120</td>
+                                        <td class="py-3 px-4 order-status-text">Pendiente</td>
+                                        <td class="py-3 px-4">
+                                            <button class="bg-blue-500 hover:bg-blue-600 text-white text-sm py-1 px-3 rounded-md transition duration-300">Editar</button>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200" data-status="Urgente">
+                                        <td class="py-3 px-4 text-gray-700">25</td>
+                                        <td class="py-3 px-4 text-gray-700">010</td>
+                                        <td class="py-3 px-4 text-gray-700">10/12/2022</td>
+                                        <td class="py-3 px-4 text-gray-700">-/-/-</td>
+                                        <td class="py-3 px-4 text-gray-700">Credito</td>
+                                        <td class="py-3 px-4 text-gray-700">30</td>
+                                        <td class="py-3 px-4 order-status-text">Urgente</td>
+                                        <td class="py-3 px-4">
+                                            <button class="bg-blue-500 hover:bg-blue-600 text-white text-sm py-1 px-3 rounded-md transition duration-300">Editar</button>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200" data-status="Completado">
+                                        <td class="py-3 px-4 text-gray-700">65</td>
+                                        <td class="py-3 px-4 text-gray-700">010</td>
+                                        <td class="py-3 px-4 text-gray-700">-/-/-</td>
+                                        <td class="py-3 px-4 text-gray-700">Tarjeta</td>
+                                        <td class="py-3 px-4 text-gray-700">29</td>
+                                        <td class="py-3 px-4 order-status-text">Completado</td>
+                                        <td class="py-3 px-4">
+                                            <button class="bg-blue-500 hover:bg-blue-600 text-white text-sm py-1 px-3 rounded-md transition duration-300">Editar</button>
+                                        </td>
+                                    </tr>
+                                    <!-- More rows can be added dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Message Modal -->
+    <div id="message-modal" class="message-modal">
+        <div class="message-modal-content">
+            <span class="close-button">&times;</span>
+            <h3 id="message-modal-title"></h3>
+            <p id="message-modal-text"></p>
+            <button id="message-modal-ok-button">OK</button>
+        </div>
+    </div>
+
+    <!-- Hidden file input for CSV import -->
+    <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+
+    <script type="module">
+        // Firebase imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signOut, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Message Modal elements
+            const messageModal = document.getElementById('message-modal');
+            const messageModalTitle = document.getElementById('message-modal-title');
+            const messageModalText = document.getElementById('message-modal-text');
+            const messageModalCloseButton = messageModal.querySelector('.close-button');
+            const messageModalOkButton = document.getElementById('message-modal-ok-button');
+
+            // Admin specific elements
+            const adminUserDisplay = document.getElementById('admin-user-display');
+            const adminLogoutButton = document.getElementById('admin-logout-button');
+            const dynamicContentArea = document.getElementById('dynamic-content-area');
+            const dashboardContentElement = document.getElementById('dashboard-content'); // Get the initial dashboard content element
+            let dashboardOriginalContent = dashboardContentElement.innerHTML; // Store its initial HTML
+
+            const toggleSidebarButton = document.getElementById('toggle-sidebar-button');
+            const csvFileInput = document.getElementById('csv-file-input'); // Get the hidden file input
+
+            // Sidebar links
+            const sidebarDashboardLink = document.getElementById('sidebar-dashboard-link');
+            const sidebarProductsLink = document.getElementById('sidebar-products-link');
+            const sidebarNewProductLink = document.getElementById('sidebar-new-product-link');
+            const sidebarRoutesLink = document.getElementById('sidebar-routes-link'); // Routes link
+            const routeZoneLinks = document.querySelectorAll('[data-route-zone]'); // Select all new zone links
+            const warehouseLinks = document.querySelectorAll('[data-warehouse]'); // Select new warehouse links
+
+
+            // Function to show custom message modal
+            const showMessageModal = (title, message) => {
+                messageModalTitle.textContent = title;
+                messageModalText.textContent = message;
+                messageModal.style.display = 'flex';
+            };
+
+            // Event listeners for message modal
+            messageModalCloseButton.addEventListener('click', () => {
+                messageModal.style.display = 'none';
+            });
+            messageModalOkButton.addEventListener('click', () => {
+                messageModal.style.display = 'none';
+            });
+            window.addEventListener('click', (event) => {
+                if (event.target === messageModal) {
+                    messageModal.style.display = 'none';
+                }
+            });
+
+            // Handle collapsible menu functionality
+            const collapsibleMenus = document.querySelectorAll('.collapsible-menu');
+            collapsibleMenus.forEach(menu => {
+                const mainLink = menu.querySelector('a');
+                const subMenu = menu.querySelector('ul');
+                const toggleIcon = menu.querySelector('.toggle-icon');
+
+                // Hide sub-menu by default
+                if (subMenu) {
+                    subMenu.style.display = 'none';
+                }
+
+                if (mainLink) {
+                    mainLink.addEventListener('click', (e) => {
+                        // Only prevent default if it's a collapsible link (has a sub-menu)
+                        if (subMenu) {
+                            e.preventDefault(); 
+                            menu.classList.toggle('active');
+                            if (subMenu.style.display === 'none') {
+                                subMenu.style.display = 'block';
+                            } else {
+                                subMenu.style.display = 'none';
+                            }
+                        }
+                    });
+                }
+            });
+
+            // Function to update order status colors
+            const updateOrderStatusColors = () => {
+                const orderRows = document.querySelectorAll('#pending-orders-table tbody tr');
+                orderRows.forEach(row => {
+                    const statusCell = row.querySelector('.order-status-text');
+                    if (statusCell) {
+                        const statusText = statusCell.textContent.trim();
+                        // Remove any existing color classes
+                        statusCell.classList.remove('text-red-500', 'text-yellow-500', 'text-green-500', 'text-orange-500');
+
+                        // Apply new color based on status
+                        switch (statusText) {
+                            case 'Urgente':
+                                statusCell.classList.add('text-red-500');
+                                break;
+                            case 'Pendiente':
+                                statusCell.classList.add('text-yellow-500'); // Changed to yellow for pending
+                                break;
+                            case 'Completado':
+                                statusCell.classList.add('text-green-500');
+                                break;
+                            default:
+                                statusCell.classList.add('text-gray-700'); // Default color for unknown status
+                                break;
+                        }
+                    }
+                });
+            };
+
+
+            // Toggle sidebar functionality
+            toggleSidebarButton.addEventListener('click', () => {
+                document.body.classList.toggle('sidebar-collapsed');
+                // Adjust button position when sidebar collapses/expands
+                if (document.body.classList.contains('sidebar-collapsed')) {
+                    toggleSidebarButton.style.left = '10px'; // Move to left edge
+                } else {
+                    toggleSidebarButton.style.left = '260px'; // Back to original position
+                }
+            });
+
+            // Product Detail Content as a JavaScript string (reverted to single product detail)
+            const productDetailContent = `
+                <div class="container mx-auto max-w-full">
+                    <div class="flex justify-between items-center mb-6 flex-wrap">
+                        <h2 class="text-3xl font-bold text-gray-800">Productos</h2>
+                        <div class="flex space-x-3 flex-wrap justify-end mt-4 lg:mt-0">
+                            <button class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md transition duration-300 mb-2 lg:mb-0">
+                                Nuevo
+                            </button>
+                            <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition duration-300 mb-2 lg:mb-0">
+                                Actualizar
+                            </button>
+                            <button id="actualizar-inventarios-btn-products" class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md transition duration-300 mb-2 lg:mb-0">
+                                Actualizar Inventarios
+                            </button>
+                            <button class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-md transition duration-300 mb-2 lg:mb-0">
+                                Actualizar Listos
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search Bar -->
+                    <div class="mb-6 flex items-center bg-white rounded-xl shadow-md p-3">
+                        <input type="text" placeholder="Buscar..." class="flex-grow p-2 border-none focus:outline-none rounded-md">
+                        <button class="text-gray-500 hover:text-blue-700 ml-2">
+                            <i class="fas fa-search text-xl"></i>
+                        </button>
+                    </div>
+
+                    <!-- Product Detail Card (Single Product View) -->
+                    <div class="bg-white rounded-xl shadow-md p-6 flex flex-col lg:flex-row items-start lg:space-x-8">
+                        <!-- Product Image Section -->
+                        <div class="lg:w-1/3 flex-shrink-0 mb-6 lg:mb-0">
+                            <img src="https://i.ebayimg.com/images/g/91UAAOSwmjBkLp11/s-l1200.webp" alt="T' Para Descarga de Doble Tarja Albatros 002-3" class="w-full h-auto rounded-lg shadow-sm object-contain max-h-80 mx-auto">
+                            <div class="mt-4 text-center">
+                                <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-md transition duration-300">
+                                    <i class="fas fa-camera mr-2"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Product Details Section -->
+                        <div class="lg:w-2/3 flex-grow">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-4">T' PARA DESCARGA DE DOBLE TARJA ALBATROS 002-3</h3>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 mb-6">
+                                <!-- Each detail item now has label above value -->
+                                <div>
+                                    <p class="text-gray-600">Descripción</p>
+                                    <p class="text-gray-800">T' PARA DESCARGA DE DOBLE TARJA ALBATROS 002-3</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-600">Código de Barras</p>
+                                    <p class="text-gray-800">Producto</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-600">Clave</p>
+                                    <p class="text-gray-800">23</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-600">Precio de Lista</p>
+                                    <p class="text-blue-700 font-semibold">$22.72</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-600">SubGrupo</p>
+                                    <p class="text-gray-800">Tipo</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-600">Grupo</p>
+                                    <p class="text-gray-800">Tipo N/A</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-600">Costo de Imposición</p>
+                                    <p class="text-green-600 font-semibold">$16.00</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-600">Evento</p>
+                                    <p class="text-gray-800">Evento</p>
+                                </div>
+                            </div>
+
+                            <div class="text-right mt-4">
+                                <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-md transition duration-300">
+                                    Editar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // New Product Form Content as a JavaScript string
+            const newProductFormContent = `
+                <div class="container mx-auto max-w-full">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Nuevo Producto</h2>
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <form id="new-product-form">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label for="product-name" class="block text-gray-700 text-sm font-bold mb-2">Nombre del Producto:</label>
+                                    <input type="text" id="product-name" name="product-name" class="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ej. Martillo de uña">
+                                </div>
+                                <div>
+                                    <label for="product-description" class="block text-gray-700 text-sm font-bold mb-2">Descripción:</label>
+                                    <textarea id="product-description" name="product-description" rows="3" class="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Descripción detallada del producto"></textarea>
+                                </div>
+                                <div>
+                                    <label for="product-key" class="block text-gray-700 text-sm font-bold mb-2">Clave:</label>
+                                    <input type="text" id="product-key" name="product-key" class="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ej. 12345">
+                                </div>
+                                <div>
+                                    <label for="product-barcode" class="block text-gray-700 text-sm font-bold mb-2">Código de Barras:</label>
+                                    <input type="text" id="product-barcode" name="product-barcode" class="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ej. 7501234567890">
+                                </div>
+                                <div>
+                                    <label for="product-cost" class="block text-gray-700 text-sm font-bold mb-2">Costo de Imposición:</label>
+                                    <input type="number" id="product-cost" name="product-cost" step="0.01" class="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ej. 15.00">
+                                </div>
+                                <div>
+                                    <label for="product-price" class="block text-gray-700 text-sm font-bold mb-2">Precio de Lista:</label>
+                                    <input type="number" id="product-price" name="product-price" step="0.01" class="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ej. 25.50">
+                                </div>
+                                <div>
+                                    <label for="product-subgroup" class="block text-gray-700 text-sm font-bold mb-2">SubGrupo:</label>
+                                    <input type="text" id="product-subgroup" name="product-subgroup" class="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ej. Herramientas Manuales">
+                                </div>
+                                <div>
+                                    <label for="product-group" class="block text-gray-700 text-sm font-bold mb-2">Grupo:</label>
+                                    <input type="text" id="product-group" name="product-group" class="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ej. Ferretería">
+                                </div>
+                                <div>
+                                    <label for="product-event" class="block text-gray-700 text-sm font-bold mb-2">Evento:</label>
+                                    <input type="text" id="product-event" name="product-event" class="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ej. Oferta Verano">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label for="product-image-upload" class="block text-gray-700 text-sm font-bold mb-2">Imagen del Producto:</label>
+                                    <input type="file" id="product-image-upload" name="product-image-upload" accept="image/*" class="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                </div>
+                            </div>
+                            <div class="flex justify-end space-x-4 mt-6">
+                                <button type="button" id="cancel-new-product" class="bg-gray-400 hover:bg-gray-500 text-white font-semibold py-2 px-6 rounded-md transition duration-300">
+                                    Cancelar
+                                </button>
+                                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-md transition duration-300">
+                                    Guardar Producto
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+
+            // Event listeners for sidebar navigation
+            sidebarDashboardLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Restore original dashboard content
+                dynamicContentArea.innerHTML = dashboardOriginalContent;
+                updateOrderStatusColors(); // Reapply colors when dashboard is loaded
+            });
+
+            // Products link now loads the product detail content from the JS string
+            sidebarProductsLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                dynamicContentArea.innerHTML = productDetailContent;
+                // After loading the product content, attach event listener to the "Actualizar Inventarios" button within it
+                const actualizarInventariosBtnProducts = document.getElementById('actualizar-inventarios-btn-products');
+                if (actualizarInventariosBtnProducts) {
+                    actualizarInventariosBtnProducts.addEventListener('click', () => {
+                        csvFileInput.click(); // Trigger the hidden file input
+                    });
+                }
+            });
+
+            // New Product link under Products now loads the new product form
+            if (sidebarNewProductLink) {
+                sidebarNewProductLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    dynamicContentArea.innerHTML = newProductFormContent;
+                    // Attach event listeners to the new form's buttons
+                    const cancelNewProductBtn = document.getElementById('cancel-new-product');
+                    if (cancelNewProductBtn) {
+                        cancelNewProductBtn.addEventListener('click', () => {
+                            dynamicContentArea.innerHTML = productDetailContent; // Go back to product detail view
+                            // Re-attach event listener for Actualizar Inventarios if needed
+                            const actualizarInventariosBtnProducts = document.getElementById('actualizar-inventarios-btn-products');
+                            if (actualizarInventariosBtnProducts) {
+                                actualizarInventariosBtnProducts.addEventListener('click', () => {
+                                    csvFileInput.click();
+                                });
+                            }
+                        });
+                    }
+                    const newProductForm = document.getElementById('new-product-form');
+                    if (newProductForm) {
+                        newProductForm.addEventListener('submit', (event) => {
+                            event.preventDefault(); // Prevent default form submission
+                            showMessageModal("Guardar Producto", "La funcionalidad para guardar el nuevo producto aún no está implementada.");
+                            // Here you would collect form data and send it to your backend/database
+                            const formData = new FormData(newProductForm);
+                            const productData = {};
+                            for (const [key, value] of formData.entries()) {
+                                productData[key] = value;
+                            }
+                            console.log("Datos del nuevo producto:", productData);
+                        });
+                    }
+                });
+            }
+
+            // Event listener for the hidden CSV file input
+            csvFileInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const csvContent = e.target.result;
+                        showMessageModal("Contenido del CSV", `<pre style="white-space: pre-wrap; text-align: left; max-height: 300px; overflow-y: auto;">${csvContent}</pre>`);
+                        // In a real application, you would parse and process csvContent here
+                        // Example: const lines = csvContent.split('\\n');
+                        // Example: const products = lines.map(line => line.split(','));
+                    };
+                    reader.onerror = () => {
+                        showMessageModal("Error de Lectura", "No se pudo leer el archivo.");
+                    };
+                    reader.readAsText(file);
+                } else {
+                    showMessageModal("Archivo no seleccionado", "Por favor, selecciona un archivo CSV.");
+                }
+            });
+
+            // Event listener for the new "Rutas" link (now a collapsible menu)
+            // No direct action needed on sidebarRoutesLink click, as its collapsible behavior is handled by the general collapsibleMenus logic.
+            // Add specific listeners for the new zone links
+            routeZoneLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const zoneName = e.target.dataset.routeZone;
+                    showMessageModal("Funcionalidad de Rutas", `La funcionalidad para la zona "${zoneName}" aún no está implementada.`);
+                });
+            });
+
+            // Add specific listeners for the new warehouse links
+            warehouseLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const warehouseNumber = e.target.dataset.warehouse;
+                    showMessageModal("Funcionalidad de Almacén", `La funcionalidad para el Almacén ${warehouseNumber} aún no está implementada.`);
+                });
+            });
+
+            // Add event listeners for other sidebar links (show message for now)
+            document.querySelectorAll('.sidebar nav ul li:not(.collapsible-menu) > a:not(#sidebar-dashboard-link):not(#sidebar-products-link):not(#sidebar-routes-link)').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showMessageModal("Funcionalidad", "Esta funcionalidad aún no está implementada.");
+                });
+            });
+            // Also for sub-menu items (excluding the new product link and new route zone links and warehouse links handled above)
+            document.querySelectorAll('.collapsible-menu ul li a:not(#sidebar-new-product-link):not([data-route-zone]):not([data-warehouse])').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showMessageModal("Funcionalidad", "Esta funcionalidad aún no está implementada.");
+                });
+            });
+
+
+            // Initialize Firebase with your actual project configuration
+            const firebaseConfig = {
+              apiKey: "AIzaSyCooFDJTZqFo2bWvZNI9iLWyYyOZjEhhS4", // <-- Reemplaza con tu API Key
+              authDomain: "YOUR_AUTH_DOMAIN",
+              projectId: "YOUR_PROJECT_ID",
+              storageBucket: "YOUR_STORAGE_BUCKET",
+              messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+              appId: "YOUR_APP_ID"
+            };
+
+            let app;
+            let auth;
+            let db; // Firestore instance
+
+            try {
+                if (Object.keys(firebaseConfig).length > 0 && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+                    app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app); // Initialize Firestore
+
+                    // Listen for auth state changes
+                    onAuthStateChanged(auth, async (user) => {
+                        if (user) {
+                            console.log("User is signed in:", user.uid);
+                            adminUserDisplay.textContent = user.email || user.displayName || 'Admin User';
+                            // In a real app, you'd fetch user role from Firestore here
+                            // and conditionally show admin features.
+                        } else {
+                            console.log("No user is signed in.");
+                        }
+                    });
+
+                    // Attempt to sign in with custom token or anonymously
+                    if (typeof __initial_auth_token !== 'undefined') {
+                        try {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                            console.log("Signed in with custom token.");
+                        } catch (tokenError) {
+                            if (tokenError.code === 'auth/custom-token-mismatch') {
+                                console.warn("Custom token mismatch, falling back to anonymous sign-in.");
+                                await signInAnonymously(auth);
+                                console.log("Signed in anonymously after custom token mismatch.");
+                            } else if (tokenError.code === 'auth/admin-restricted-operation') {
+                                console.error("Anonymous sign-in is not enabled for this Firebase project.");
+                                showMessageModal("Error de Autenticación", "La autenticación anónima no está habilitada. Por favor, habilítala en la consola de Firebase (Authentication > Sign-in method > Anonymous).");
+                            }
+                             else {
+                                throw tokenError; // Re-throw other token errors
+                            }
+                        }
+                    } else {
+                        // Directly attempt anonymous sign-in if no custom token
+                        try {
+                            await signInAnonymously(auth);
+                            console.log("Signed in anonymously.");
+                        } catch (anonError) {
+                            if (anonError.code === 'auth/admin-restricted-operation') {
+                                console.error("Anonymous sign-in is not enabled for this Firebase project.");
+                                showMessageModal("Error de Autenticación", "La autenticación anónima no está habilitada. Por favor, habilítala en la consola de Firebase (Authentication > Sign-in method > Anonymous).");
+                            } else {
+                                throw anonError; // Re-throw other anonymous sign-in errors
+                            }
+                        }
+                    }
+                } else {
+                    console.warn("Firebase config not found or is default. Firebase features will be disabled.");
+                    showMessageModal("Configuración de Firebase", "La configuración de Firebase no se encontró o es la predeterminada. Las funciones de autenticación estarán deshabilitadas. Por favor, actualiza firebaseConfig con los datos de tu proyecto.");
+                }
+            } catch (error) {
+                console.error("Error initializing Firebase:", error);
+                if (error.code === 'auth/admin-restricted-operation') {
+                    showMessageModal("Error de Inicialización", "La autenticación anónima no está habilitada para este proyecto de Firebase. Por favor, habilítala en la consola de Firebase (Authentication > Sign-in method > Anonymous).");
+                } else {
+                    showMessageModal("Error de Inicialización", `Hubo un error al inicializar Firebase: ${error.message}`);
+                }
+            }
+
+            // Handle admin logout
+            adminLogoutButton.addEventListener('click', async () => {
+                if (auth) {
+                    try {
+                        await signOut(auth);
+                        console.log("User signed out.");
+                        showMessageModal("Sesión Cerrada", "Has cerrado sesión exitosamente. Por favor, abre la página de inicio de sesión (login.html) para continuar.");
+                    } catch (error) {
+                        console.error("Error signing out:", error);
+                        showMessageModal("Error al Cerrar Sesión", `Hubo un error al cerrar sesión: ${error.message}`);
+                    }
+                }
+            });
+
+            // Initial load: Ensure the dashboard content is shown when the page loads
+            dynamicContentArea.innerHTML = dashboardOriginalContent;
+            updateOrderStatusColors(); // Call this function on initial load
+        });
+    </script>
+</body>
+</html>
